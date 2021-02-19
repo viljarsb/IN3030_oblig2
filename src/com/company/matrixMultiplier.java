@@ -74,15 +74,15 @@ public class matrixMultiplier {
     }
 
     private static double[][] parallelAlgorithm() {
-        int numberOfProcessors = 8;//Runtime.getRuntime().availableProcessors();
+        int numberOfProcessors = 11;//Runtime.getRuntime().availableProcessors();
         barrier = new CyclicBarrier(numberOfProcessors + 1);
 
         //amount of cells each thread has to work on.
-        int partitonSize = (matrixA.length * matrixB[0].length) / numberOfProcessors;
+        int partitonSize = (int) Math.floor(((matrixA.length * matrixB[0].length) / numberOfProcessors));
         int modRes = (matrixA.length * matrixB[0].length) % numberOfProcessors;
 
         int currentCol = 0;
-        int endCol = currentCol + partitonSize;
+        int endCol = currentCol + partitonSize - 1;
         int currentRow = 0;
         int endRow = 0;
 
@@ -91,20 +91,19 @@ public class matrixMultiplier {
             while(endCol > resultMatrix[0].length)
             {
                 endRow = endRow + 1;
-                endCol = endCol - resultMatrix[0].length;
+                endCol = endCol - (resultMatrix[0].length) - 1;
             }
 
-            System.out.println(" IM WORKING FROM INDEX: " + currentCol + " ON ROW " + currentRow + " to INDEX " + endCol + " ON ROW " + endRow);
+           // System.out.println(" IM WORKING FROM INDEX: " + currentCol + " ON ROW " + currentRow + " to INDEX " + endCol + " ON ROW " + endRow);
             new Thread(new Worker(i, currentCol, currentRow, endCol, endRow)).start();
 
+            if(i == numberOfProcessors - modRes - 1 && modRes != 0)
+                partitonSize = partitonSize + 1;
 
-            currentCol = endCol;
+            currentCol = endCol+1;
             currentRow = endRow;
             endCol = endCol + partitonSize;
         }
-
-
-
 
         try{
             barrier.await();
@@ -140,7 +139,7 @@ public class matrixMultiplier {
 
             int toCol;
             if(startRow != endRow)
-                toCol = resultMatrix[0].length;
+                toCol = resultMatrix[0].length - 1;
             else
                 toCol = endCol;
 
@@ -149,6 +148,8 @@ public class matrixMultiplier {
                     toCol = endCol;
 
                 for (int j = startCol; j < toCol; j++) {
+                    if(this.id == 0)
+                        System.out.println("CURRRRRENT COL IS: " + j);
                     multiplyCells(i, j);
                 }
             }
@@ -171,7 +172,6 @@ public class matrixMultiplier {
         }
         resultMatrix[row][col] = cellResult;
     }
-
 
     private static double[][] transposeMatrix(double[][] matrix){
         int i = matrix.length;
