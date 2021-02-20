@@ -41,9 +41,21 @@ public class matrixMultiplier {
             return parallelAlgorithm();
         }
 
-        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_B_TRANSPOSED));
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_B_TRANSPOSED))
+        {
+            matrixA = transposeMatrix(a);
+            matrixB = b;
+            resultMatrix = new double[matrixA.length][matrixB[0].length];
+            return parallelAlgorithm();
+        }
 
-        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_A_TRANSPOSED));
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_A_TRANSPOSED))
+        {
+            matrixA = a;
+            matrixB = transposeMatrix(b);
+            resultMatrix = new double[matrixA.length][matrixB[0].length];
+            return parallelAlgorithm();
+        }
 
         else{
             System.out.println("No mode of operation supplied.");
@@ -74,35 +86,41 @@ public class matrixMultiplier {
     }
 
     private static double[][] parallelAlgorithm() {
-        int numberOfProcessors = 11;//Runtime.getRuntime().availableProcessors();
+
+        int a_col = matrixA[0].length;
+        int b_row = matrixB.length;
+
+        if(a_col != b_row){
+            System.out.println("Can not multiply these matrixes");
+            System.exit(-1);
+        }
+
+        int numberOfProcessors = Runtime.getRuntime().availableProcessors();
         barrier = new CyclicBarrier(numberOfProcessors + 1);
 
-        //amount of cells each thread has to work on.
-        int partitonSize = (int) Math.floor(((matrixA.length * matrixB[0].length) / numberOfProcessors));
-        int modRes = (matrixA.length * matrixB[0].length) % numberOfProcessors;
+        int partitonSize = (resultMatrix.length * resultMatrix[0].length) / numberOfProcessors;
+        int modRes = (resultMatrix.length * resultMatrix[0].length) % numberOfProcessors;
 
         int currentCol = 0;
-        int endCol = currentCol + partitonSize - 1;
         int currentRow = 0;
-        int endRow = 0;
+        int endCol;
+        int endRow;
+        int index = partitonSize-1;
 
         for(int i = 0; i < numberOfProcessors; i++){
 
-            while(endCol > resultMatrix[0].length)
-            {
-                endRow = endRow + 1;
-                endCol = endCol - (resultMatrix[0].length) - 1;
-            }
+            endCol = index%resultMatrix[0].length;
+            endRow = index/resultMatrix[0].length;
 
-           // System.out.println(" IM WORKING FROM INDEX: " + currentCol + " ON ROW " + currentRow + " to INDEX " + endCol + " ON ROW " + endRow);
             new Thread(new Worker(i, currentCol, currentRow, endCol, endRow)).start();
 
-            if(i == numberOfProcessors - modRes - 1 && modRes != 0)
+            if(i == (numberOfProcessors - 1) - modRes && modRes != 0)
                 partitonSize = partitonSize + 1;
 
-            currentCol = endCol+1;
             currentRow = endRow;
-            endCol = endCol + partitonSize;
+            currentCol = endCol;
+            index = index + partitonSize;
+
         }
 
         try{
@@ -114,11 +132,6 @@ public class matrixMultiplier {
 
         return resultMatrix;
     }
-
-
-
-
-
 
     private static class Worker implements Runnable {
         int id;
@@ -135,26 +148,21 @@ public class matrixMultiplier {
 
         @Override
         public void run() {
-           // System.out.println("HEY IM THREAD: " + id + " IM WORKING FROM INDEX: " + startCol + " ON ROW " + startRow + " to INDEX " + endCol + " ON ROW " + endRow);
 
-            int toCol;
-            if(startRow != endRow)
-                toCol = resultMatrix[0].length - 1;
-            else
-                toCol = endCol;
+            int currentCol = startCol;
 
+            loop:
             for (int i = startRow; i <= endRow; i++) {
-                if(i == endRow)
-                    toCol = endCol;
 
-                for (int j = startCol; j < toCol; j++) {
-                    if(this.id == 0)
-                        System.out.println("CURRRRRENT COL IS: " + j);
+                if(i != startRow)
+                    currentCol = 0;
+
+                for (int j = currentCol; j < resultMatrix[0].length; j++) {
                     multiplyCells(i, j);
+                    if(j == endCol && i == endRow)
+                        break loop;
                 }
             }
-
-
 
             try{
                 barrier.await();
