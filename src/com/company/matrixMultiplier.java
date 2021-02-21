@@ -6,11 +6,10 @@ import java.util.concurrent.CyclicBarrier;
 public class matrixMultiplier {
 
     private static double[][] matrixA, matrixB;
-    private static double resultMatrix[][];
+    private static double[][] resultMatrix;
     private static CyclicBarrier barrier;
 
-    public static double[][] multiplyMatrixes(double[][] a, double[][] b, Oblig2Precode.Mode modeOfOperation)
-    {
+    public static double[][] multiplyMatrixes(double[][] a, double[][] b, Oblig2Precode.Mode modeOfOperation) {
 
         if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED)){
             matrixA = a;
@@ -176,7 +175,7 @@ public class matrixMultiplier {
     private static void multiplyCells(int row, int col) {
         double cellResult = 0;
         for(int j = 0; j < matrixB.length; j++){
-            cellResult = cellResult + matrixA[row][col] * matrixB[row][col];
+            cellResult = cellResult + matrixA[row][j] * matrixB[j][col];
         }
         resultMatrix[row][col] = cellResult;
     }

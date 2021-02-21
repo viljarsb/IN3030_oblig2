@@ -1,26 +1,29 @@
 package com.company;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class Main {
 
     public static void main(String[] args) {
         int n = Integer.parseInt(args[0]);
-        runTests(n, 103, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED);
-        runTests(n, 103, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
-        runTests(n, 103, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
-        runTests(n, 103, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED);
-        runTests(n, 103, Oblig2Precode.Mode.SEQ_A_TRANSPOSED);
-        runTests(n, 103, Oblig2Precode.Mode.SEQ_B_TRANSPOSED);
+        System.out.println("Program starting execution with N: " + n);
+        System.out.println("Starting tests now..\n");
+        runTests(n, 7035, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.SEQ_A_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.SEQ_B_TRANSPOSED);
+        System.out.println("\nTerminating program.");
     }
 
     private static void runTests(int n, int seed, Oblig2Precode.Mode modeOfOperation)
     {
+        System.out.println("Starting test of: " + modeOfOperation + " and will run 7 executions. ");
         Oblig2Precode manager = new Oblig2Precode();
-        double[][] matrixA = manager.generateMatrixA(seed, n);
-        double[][] matrixB = manager.generateMatrixB(seed, n);
+        double[][] matrixA = Oblig2Precode.generateMatrixA(seed, n);
+        double[][] matrixB = Oblig2Precode.generateMatrixB(seed, n);
 
         ArrayList<Long> timing = new ArrayList<Long>();
 
@@ -32,7 +35,7 @@ public class Main {
             timing.add((end-start)/100000);
             System.out.println(modeOfOperation + " run: " + (i + 1) + " used: " + (end-start)/100000 + " ms");
         }
-        System.out.println(modeOfOperation + " had a median run time of: " + calculateMedian(timing) + " milliseconds over: " + 7 + " executions");
+        System.out.println(modeOfOperation + " had a median run time of: " + calculateMedian(timing) + " milliseconds over: " + 7 + " executions\n");
     }
 
     private static long calculateMedian(ArrayList<Long> timing)
