@@ -10,14 +10,19 @@ public class Main {
         System.out.println("Program starting execution with N: " + n);
         System.out.println("Starting tests now..\n");
         runTests(n, 7035, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
         runTests(n, 7035, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
         runTests(n, 7035, Oblig2Precode.Mode.SEQ_A_TRANSPOSED);
+        runTests(n, 7035, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
         runTests(n, 7035, Oblig2Precode.Mode.SEQ_B_TRANSPOSED);
+
         System.out.println("\nTerminating program.");
     }
 
+    /*
+        A simple function to run tests of the 6 algorithms implemented in matrixMultiplier.
+        @Param  int size, int seed, and mode of operation.
+    */
     private static void runTests(int n, int seed, Oblig2Precode.Mode modeOfOperation)
     {
         System.out.println("Starting test of: " + modeOfOperation + " and will run 7 executions. ");
@@ -32,8 +37,8 @@ public class Main {
             long start = System.nanoTime();
             double[][] resultMatrix = matrixMultiplier.multiplyMatrixes(matrixA, matrixB, modeOfOperation);
             long end = System.nanoTime();
-            timing.add((end-start)/100000);
-            System.out.println(modeOfOperation + " run: " + (i + 1) + " used: " + (end-start)/100000 + " ms");
+            timing.add((end-start)/1000000);
+            System.out.println(modeOfOperation + " run: " + (i + 1) + " used: " + (end-start)/1000000 + " ms");
         }
         System.out.println(modeOfOperation + " had a median run time of: " + calculateMedian(timing) + " milliseconds over: " + 7 + " executions\n");
     }
@@ -46,4 +51,5 @@ public class Main {
         else
             return (timing.get(timing.size() / 2 - 1) + timing.get(timing.size() / 2)) / 2;
     }
+
 }

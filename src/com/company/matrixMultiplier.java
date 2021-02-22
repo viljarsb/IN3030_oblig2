@@ -9,8 +9,16 @@ public class matrixMultiplier {
     private static double[][] resultMatrix;
     private static CyclicBarrier barrier;
 
+    /*
+        This is the method that is visable and usable by the user, and will return the result of the multiplication
+        to the user.
+
+        @Param  The two double matrixes to multiply, and the mode of operation.
+        @Return  The resulting matrix containing the product of a * b.
+     */
     public static double[][] multiplyMatrixes(double[][] a, double[][] b, Oblig2Precode.Mode modeOfOperation) {
 
+        //Choose the right a and b according to mode of operation, and run with threads or sequential.
         if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED)){
             matrixA = a;
             matrixB = b;
@@ -65,6 +73,11 @@ public class matrixMultiplier {
         return null;
     }
 
+
+    /*
+        The classic algorithm for matrix multiplication.
+        @Return  The result matrix.
+    */
     private static double[][] classicAlgorithm(){
         int a_col = matrixA[0].length;
         int b_row = matrixB.length;
@@ -75,9 +88,10 @@ public class matrixMultiplier {
             System.exit(-1);
         }
 
-        for(int i = 0; i < resultMatrix.length; i++){
-            for(int j = 0; j < resultMatrix[i].length; j++){
-                multiplyCells(i, j);
+        //For each cell in resultMatrix perform the multiplication.
+        for(int row = 0; row < resultMatrix.length; row++){
+            for(int col = 0; col < resultMatrix[row].length; col++){
+                multiplyCells(row, col);
             }
         }
 
@@ -85,7 +99,6 @@ public class matrixMultiplier {
     }
 
     private static double[][] parallelAlgorithm() {
-
         int a_col = matrixA[0].length;
         int b_row = matrixB.length;
 
