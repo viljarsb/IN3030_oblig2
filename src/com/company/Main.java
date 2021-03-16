@@ -1,21 +1,21 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Main {
-
+    static int trials = 1;
     public static void main(String[] args) {
         int n = Integer.parseInt(args[0]);
         System.out.println("Program starting execution with N: " + n);
         System.out.println("Starting tests now..\n");
-        runTests(n, 7035, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.SEQ_A_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
-        runTests(n, 7035, Oblig2Precode.Mode.SEQ_B_TRANSPOSED);
-
+        runTests(n, trials, 7035, Oblig2Precode.Mode.PARA_NOT_TRANSPOSED);
+        runTests(n, trials, 7035, Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED);
+        runTests(n, trials, 7035, Oblig2Precode.Mode.PARA_A_TRANSPOSED);
+        runTests(n, trials, 7035, Oblig2Precode.Mode.SEQ_A_TRANSPOSED);
+        runTests(n, trials, 7035, Oblig2Precode.Mode.PARA_B_TRANSPOSED);
+        runTests(n, trials, 7035, Oblig2Precode.Mode.SEQ_B_TRANSPOSED);
         System.out.println("\nTerminating program.");
     }
 
@@ -23,7 +23,7 @@ public class Main {
         A simple function to run tests of the 6 algorithms implemented in matrixMultiplier.
         @Param  int size, int seed, and mode of operation.
     */
-    private static void runTests(int n, int seed, Oblig2Precode.Mode modeOfOperation)
+    private static void runTests(int n, int trials, int seed, Oblig2Precode.Mode modeOfOperation)
     {
         System.out.println("Starting test of: " + modeOfOperation + " and will run 7 executions. ");
         Oblig2Precode manager = new Oblig2Precode();
@@ -32,10 +32,11 @@ public class Main {
 
         ArrayList<Long> timing = new ArrayList<Long>();
 
-        for(int i = 0; i < 7; i++)
+        for(int i = 0; i < trials; i++)
         {
             long start = System.nanoTime();
             double[][] resultMatrix = matrixMultiplier.multiplyMatrixes(matrixA, matrixB, modeOfOperation);
+            System.out.println(Arrays.deepToString(resultMatrix));
             long end = System.nanoTime();
             timing.add((end-start)/1000000);
             System.out.println(modeOfOperation + " run: " + (i + 1) + " used: " + (end-start)/1000000 + " ms");

@@ -23,21 +23,7 @@ public class matrixMultiplier {
             matrixA = a;
             matrixB = b;
             resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return classicAlgorithm();
-        }
-
-        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_A_TRANSPOSED)){
-            matrixA = transposeMatrix(a);
-            matrixB = b;
-            resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return classicAlgorithm();
-        }
-
-        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_B_TRANSPOSED)){
-            matrixA = a;
-            matrixB = transposeMatrix(b);
-            resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return classicAlgorithm();
+            return classicAlgorithm(modeOfOperation);
         }
 
         else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_NOT_TRANSPOSED))
@@ -45,24 +31,39 @@ public class matrixMultiplier {
             matrixA = a;
             matrixB = b;
             resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return parallelAlgorithm();
+            return parallelAlgorithm(modeOfOperation);
         }
 
-        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_B_TRANSPOSED))
-        {
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_A_TRANSPOSED)){
             matrixA = transposeMatrix(a);
             matrixB = b;
             resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return parallelAlgorithm();
+            return classicAlgorithm(modeOfOperation);
         }
 
         else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_A_TRANSPOSED))
         {
+            matrixA = transposeMatrix(a);
+            matrixB = b;
+            resultMatrix = new double[matrixA.length][matrixB[0].length];
+            return parallelAlgorithm(modeOfOperation);
+        }
+
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_B_TRANSPOSED)){
             matrixA = a;
             matrixB = transposeMatrix(b);
             resultMatrix = new double[matrixA.length][matrixB[0].length];
-            return parallelAlgorithm();
+            return classicAlgorithm(modeOfOperation);
         }
+
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.PARA_B_TRANSPOSED))
+        {
+            matrixA = a;
+            matrixB = transposeMatrix(b);
+            resultMatrix = new double[matrixA.length][matrixB[0].length];
+            return parallelAlgorithm(modeOfOperation);
+        }
+
 
         else{
             System.out.println("No mode of operation supplied.");
@@ -78,7 +79,7 @@ public class matrixMultiplier {
         The classic algorithm for matrix multiplication.
         @Return  The result matrix.
     */
-    private static double[][] classicAlgorithm(){
+    private static double[][] classicAlgorithm(Oblig2Precode.Mode modeOfOperation){
         int a_col = matrixA[0].length;
         int b_row = matrixB.length;
 
@@ -91,14 +92,14 @@ public class matrixMultiplier {
         //For each cell in resultMatrix perform the multiplication.
         for(int row = 0; row < resultMatrix.length; row++){
             for(int col = 0; col < resultMatrix[row].length; col++){
-                multiplyCells(row, col);
+                multiplyCells(row, col, modeOfOperation);
             }
         }
 
         return resultMatrix;
     }
 
-    private static double[][] parallelAlgorithm() {
+    private static double[][] parallelAlgorithm(Oblig2Precode.Mode modeOfOperation) {
         int a_col = matrixA[0].length;
         int b_row = matrixB.length;
 
@@ -124,7 +125,7 @@ public class matrixMultiplier {
             endCol = index%resultMatrix[0].length;
             endRow = index/resultMatrix[0].length;
 
-            new Thread(new Worker(i, currentCol, currentRow, endCol, endRow)).start();
+            new Thread(new Worker(i, currentCol, currentRow, endCol, endRow, modeOfOperation)).start();
 
             if(i == (numberOfProcessors - 1) - modRes && modRes != 0)
                 partitonSize = partitonSize + 1;
@@ -148,14 +149,15 @@ public class matrixMultiplier {
     private static class Worker implements Runnable {
         int id;
         int startCol, startRow, endCol, endRow;
+        Oblig2Precode.Mode modeOfOperation;
 
-        public Worker(int id, int startCol, int startRow, int endCol, int endRow) {
+        public Worker(int id, int startCol, int startRow, int endCol, int endRow, Oblig2Precode.Mode modeOfOperation) {
             this.id = id;
             this.startCol = startCol;
             this.endCol = endCol;
             this.startRow = startRow;
             this.endRow = endRow;
-
+            this.modeOfOperation = modeOfOperation;
         }
 
         @Override
@@ -170,7 +172,7 @@ public class matrixMultiplier {
                     currentCol = 0;
 
                 for (int j = currentCol; j < resultMatrix[0].length; j++) {
-                    multiplyCells(i, j);
+                    multiplyCells(i, j, modeOfOperation);
                     if(j == endCol && i == endRow)
                         break loop;
                 }
@@ -185,12 +187,32 @@ public class matrixMultiplier {
         }
     }
 
-    private static void multiplyCells(int row, int col) {
+    private static void multiplyCells(int row, int col, Oblig2Precode.Mode modeOfOperation) {
         double cellResult = 0;
-        for(int j = 0; j < matrixB.length; j++){
-            cellResult = cellResult + matrixA[row][j] * matrixB[j][col];
+
+        if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_NOT_TRANSPOSED) || modeOfOperation.equals(Oblig2Precode.Mode.PARA_NOT_TRANSPOSED))
+        {
+            for(int j = 0; j < matrixB.length; j++){
+                cellResult = cellResult + matrixA[row][j] * matrixB[j][col];
+            }
+            resultMatrix[row][col] = cellResult;
         }
-        resultMatrix[row][col] = cellResult;
+
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_A_TRANSPOSED) || modeOfOperation.equals(Oblig2Precode.Mode.PARA_A_TRANSPOSED))
+        {
+            for(int j = 0; j < matrixB.length; j++){
+                cellResult = cellResult + matrixA[j][row] * matrixB[j][col];
+            }
+            resultMatrix[row][col] = cellResult;
+        }
+
+        else if(modeOfOperation.equals(Oblig2Precode.Mode.SEQ_B_TRANSPOSED) || modeOfOperation.equals(Oblig2Precode.Mode.PARA_B_TRANSPOSED))
+        {
+            for(int j = 0; j < matrixB.length; j++){
+                cellResult = cellResult + matrixA[row][j] * matrixB[col][j];
+            }
+            resultMatrix[row][col] = cellResult;
+        }
     }
 
     private static double[][] transposeMatrix(double[][] matrix){
